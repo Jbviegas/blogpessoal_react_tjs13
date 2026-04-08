@@ -3,6 +3,7 @@ import axios from "axios";
 // Cria uma nova instância do Axios
 const api = axios.create({
 
+
   baseURL: 'https://blogpessoal-vjnq.onrender.com'
 
 })
