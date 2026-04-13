@@ -1,173 +1,168 @@
-import { useState, useContext, useEffect, type ChangeEvent, type SyntheticEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { AuthContext } from "../../../contexts/AuthContext";
-import type Tema from "../../../models/Tema";
-import { atualizar, buscar, cadastrar } from "../../../services/Service";
-import { ClipLoader } from "react-spinners";
+import {
+    useContext,
+    useEffect,
+    useState,
+    type ChangeEvent,
+    type SyntheticEvent,
+} from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ClipLoader } from 'react-spinners'
+import { AuthContext } from '../../../contexts/AuthContext'
+import type Tema from '../../../models/Tema'
+import { atualizar, buscar, cadastrar } from '../../../services/Service'
+import { ToastAlerta } from '../../../utils/ToastAlerta'
 
 function FormTema() {
-
     // Objeto responsável por redirecionar o usuário para uma outra rota
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     // Estado para controlar o Loader (animação de carregamento)
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     // Estado que irá receber os dados do tema que será persistido no Backend
-    const [tema, setTema] = useState<Tema>({} as Tema);
+    const [tema, setTema] = useState<Tema>({} as Tema)
 
     // Acessa o token do usuário autenticado
-    const { usuario, handleLogout } = useContext(AuthContext);
+    const { usuario, handleLogout } = useContext(AuthContext)
 
     // Cria um objeto para armazenar o token
-    const token = usuario.token;
+    const token = usuario.token
 
     // Acessar o parâmetro id da rota de edição do tema
-    const { id } = useParams<{ id: string }>();
+    const { id } = useParams<{ id: string }>()
 
     // Função para buscar um tema pelo id no backend
     // que será atualizado no form
-    async function buscarTemaPorId(){
-        try{
-    
-            setIsLoading(true);
-    
+    async function buscarTemaPorId() {
+        try {
+            setIsLoading(true)
+
             await buscar(`/temas/${id}`, setTema, {
-                headers: { Authorization: token }
-            });
-    
-        }catch(error: any){
-            if(error.toString().includes('401')){
-                handleLogout();
+                headers: { Authorization: token },
+            })
+        } catch (error: any) {
+            if (error.toString().includes('401')) {
+                handleLogout()
             }
-        } finally{
-            setIsLoading(false);
+        } finally {
+            setIsLoading(false)
         }
     }
 
     // Cria um useEffect para monitorar o token
-    useEffect( () => {
-        if(token === ''){
-            alert('Você precisa estar logado!');
+    useEffect(() => {
+        if (token === '') {
+            ToastAlerta('Você precisa estar logado!', "info")
             navigate('/')
         }
     }, [token])
-    
-     // Cria um useEffect para monitorar o id (rota)
-    useEffect( () => {
-        if(id !== undefined){
-            buscarTemaPorId();
+
+    // Cria um useEffect para monitorar o id (rota)
+    useEffect(() => {
+        if (id !== undefined) {
+            buscarTemaPorId()
         }
     }, [id])
 
-     // Função de atualização do estado tema
-    function atualizarEstado(e: ChangeEvent<HTMLInputElement>){
+    // Função de atualização do estado tema
+    function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
         setTema({
-          ...tema,
-          [e.target.name]: e.target.value
+            ...tema,
+            [e.target.name]: e.target.value,
         })
     }
 
-    async function gerarNovoTema(e: SyntheticEvent<HTMLFormElement>){
-        
-        e.preventDefault();
+    async function gerarNovoTema(e: SyntheticEvent<HTMLFormElement>) {
+        e.preventDefault()
 
-        setIsLoading(true);
+        setIsLoading(true)
 
-        if(id !== undefined){
-
+        if (id !== undefined) {
             // Atualização
-            try{
-
+            try {
                 await atualizar('/temas', tema, setTema, {
-                    headers: { Authorization: token }
-                });
+                    headers: { Authorization: token },
+                })
 
-                alert('Tema atualizado com sucesso!')
-
-            }catch (error: any){
-
-                if(error.toString().includes('401')){
-                    handleLogout();
-                }else{
-                    alert('Erro ao Atualizar o Tema!');
+                ToastAlerta('Tema atualizado com sucesso!', "sucesso")
+            } catch (error: any) {
+                if (error.toString().includes('401')) {
+                    handleLogout()
+                } else {
+                    ToastAlerta('Erro ao Atualizar o Tema!', "erro")
                 }
             }
-
-        } else{
-
+        } else {
             // Cadastro
-            try{
-
+            try {
                 await cadastrar('/temas', tema, setTema, {
-                    headers: { Authorization: token }
-                });
+                    headers: { Authorization: token },
+                })
 
-                alert('Tema cadastrado com sucesso!')
-
-            }catch (error: any){
-                if(error.toString().includes('401')){
-                    handleLogout();
-                }else{
-                    alert('Erro ao Cadastrar o Tema!');
+                ToastAlerta('Tema cadastrado com sucesso!', "sucesso")
+            } catch (error: any) {
+                if (error.toString().includes('401')) {
+                    handleLogout()
+                } else {
+                    ToastAlerta('Erro ao Cadastrar o Tema!', "erro")
                 }
             }
-
         }
 
-        setIsLoading(false);
-        retornar();
+        setIsLoading(false)
+        retornar()
     }
 
-    function retornar(){
-        navigate('/temas');
+    function retornar() {
+        navigate('/temas')
     }
-
-    console.log(JSON.stringify(tema));
 
     return (
         <div className="container flex flex-col items-center justify-center mx-auto">
             <h1 className="text-4xl text-center my-8">
-                {id === undefined ? "Cadastrar" : "Editar"} Tema
+                {id === undefined ? 'Cadastrar' : 'Editar'} Tema
             </h1>
 
-            <form className="w-1/2 flex flex-col gap-4" 
+            <form
+                className="w-1/2 flex flex-col gap-4"
                 onSubmit={gerarNovoTema}
             >
                 <div className="flex flex-col gap-2">
-                    <label htmlFor="descricao">Descrição do Tema</label>
+                    <label htmlFor="descricao">
+                        Descrição do Tema
+                    </label>
                     <input
                         type="text"
                         placeholder="Descreva aqui seu tema"
-                        name='descricao'
+                        name="descricao"
                         className="border-2 border-slate-700 rounded p-2"
                         value={tema.descricao}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => atualizarEstado(e)}
+                        onChange={(
+                            e: ChangeEvent<HTMLInputElement>,
+                        ) => atualizarEstado(e)}
                     />
                 </div>
                 <button
                     className="rounded text-slate-100 bg-indigo-400 
                                hover:bg-indigo-800 w-1/2 py-2 mx-auto flex justify-center"
-                    type="submit">
-                    
-                     {
-                        isLoading ?
-                    
-                            <ClipLoader
-                                color="#ffffff"
-                                size={24}
-                            />
-                    
-                        :
-                    
-                            <span>{id === undefined ? "Cadastrar" : "Atualizar"}</span>
-                    
-                    }
-
+                    type="submit"
+                >
+                    {isLoading ? (
+                        <ClipLoader
+                            color="#ffffff"
+                            size={24}
+                        />
+                    ) : (
+                        <span>
+                            {id === undefined
+                                ? 'Cadastrar'
+                                : 'Atualizar'}
+                        </span>
+                    )}
                 </button>
             </form>
         </div>
-    );
+    )
 }
 
-export default FormTema;
+export default FormTema
