@@ -13,8 +13,9 @@ import FormPostagem from "./components/postagem/formpostagem/FormPostagem"
 import ListaPostagens from "./components/postagem/listapostagens/ListaPostagens"
 import { ToastContainer } from "react-toastify"
 import 'react-toastify/dist/ReactToastify.css'
-import AtualizarPerfil from "./pages/perfil/Atualizarperfil"
 import Perfil from "./pages/perfil/Perfil"
+import AtualizarPerfil from "./pages/perfil/AtualizarPerfil"
+
 
 function App() {
   
